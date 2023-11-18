@@ -96,11 +96,14 @@ To set it up, make an account on Cloudflare and purchase a domain name. Afterwar
 I recommend setting it up for at least overseer so you can use its request function while on the go by just opening up a browser. On phones you can also save a website as an app.
 
 #### Webhooks
-One final thing I set up is a way for me to be notified when there is an event on one of the services. There are some 
+One final thing I set up is a way for me to be notified when there is an event on one of the services. There are some Docker containers that work to do so, but I've found it to be the easiest to work with webhooks on a Discord server. You simply make a new Discord channel, create a webhook, and copy paste into the services you would like reporting.  
 
 ## Troubleshooting
+This seems all easy but I ran into a lot of roadblocks that I had to work around to get everything to actually work. Of those, here are the main difficulties I faced. 
 ### Permissions
+
 ### Network
+
 ### Hardware transcoding
 
 
