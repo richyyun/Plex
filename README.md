@@ -58,15 +58,33 @@ All other settings can be found by looking up the image documentation.
 ### Services
 In order of the services that are on my Docker compose yaml file and specific settings:
 1. [expressvpn](https://hub.docker.com/r/polkaned/expressvpn) - VPN
-   - Requires an activation code
-   - Needs to be a `NET_ADMIN`
-   - `/dev/net/tun` device allows for the VPN networking
-   - List all ports for services using the VPN network  
+  - Requires an activation code
+  - Needs to be a `NET_ADMIN`
+  - `/dev/net/tun` device allows for the VPN networking
+  - List all ports for services using the VPN network  
 2. [plex](https://hub.docker.com/r/linuxserver/plex) - Plex media server
-   - Use `network_mode:host` if possible. Otherwise, need to map all the ports listed
-   - Requires mapping of `/movies` and `/tv`
-   - `/dev/dri` device enables hardware transcoding
-3. 
+  - Use `network_mode:host` if possible. Otherwise, need to map all the ports listed
+  - Requires mapping of `/movies` and `/tv`
+  - `/dev/dri` device enables hardware transcoding
+3. [radarr](https://hub.docker.com/r/linuxserver/radarr) - movie collection manager
+  - Requires mapping of `/downloads` which is where the movies are downloaded to and `/movies` which is where the movies will be stored
+4. [sonarr](https://hub.docker.com/r/linuxserver/sonarr) - tv show collection manager
+  - Requires mapping of `/downloads` which is where the movies are downloaded to and `/tv` which is where the shows will be stored
+5. [prowlarr](https://hub.docker.com/r/linuxserver/prowlarr) - indexer manager. Both radarr and sonarr rely on indexers (ways of tracking down media).
+6. [bazarr](https://hub.docker.com/r/linuxserver/bazarr) - subtitle collection manager
+7. [qbittorrent](https://hub.docker.com/r/linuxserver/qbittorrent) - torrent client
+  - Requires mapping of `/downloads` which is where everything is downloaded to. Must be the same locally as the `/downloads` in radarr and sonarr
+8. [overseer](https://hub.docker.com/r/linuxserver/overseerr) - media request management
+9. [heimdall](https://hub.docker.com/r/linuxserver/heimdall) - application dashboard
+10. [tautulli](https://hub.docker.com/r/linuxserver/tautulli) - Plex server stats monitoring
+
+Note I have every service other than Plex itself on the VPN as I figured it wouldn't hurt. You can also put Plex on the VPN but accessing outside your local network might get more complicated. 
+To put a service on the VPN simply add `network_mode: service:expressvpn`. You should also add a `depends_on:` clause so it starts up after the VPN. If not using a VPN (or if the VPN is standalone and not dockerized) you need to setup an internal network such that each service can access one another as they will be isolated otherwise.  
+
+### Setup
+#### Settings
+#### Cloudflare tunneling
+#### Webhooks
 
 ## Troubleshooting
 ### Permissions
