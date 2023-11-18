@@ -83,7 +83,14 @@ To put a service on the VPN simply add `network_mode: service:expressvpn`. You s
 
 ### Setup
 #### Settings
+You can login and/or apply settings to each service by accessing its webUI through localhost:port on a browser. Note that for Plex it's localhost:32400/web/. Besides basic settings, the following connections have to be made between services using authentication tokens:
+1. radarr and sonarr need to access qbittorrent
+2. bazarr, prowlarr, and overseer need to access radarr and sonarr
+3. tautulli needs to access plex
+   
 #### Cloudflare tunneling
+
+
 #### Webhooks
 
 ## Troubleshooting
