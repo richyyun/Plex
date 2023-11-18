@@ -24,7 +24,7 @@ After much research I decided to implement everything on Docker in a Linux OS. T
 3. Docker makes adding additional programs / services, keeping them updated, and tweaking properties much simpler
 4. Docker is more lightweight than individually installed programs
 
-There was definitely a steep learning curve. I still don't quite understand all the underlying mechanisms that are operating under the hood, but I'll try to lay out its implementation as simply as possible here. Read through the [Docker website](https://docs.docker.com/get-started/overview/) or watch this [youtube video](https://www.youtube.com/watch?v=aLipr7tTuA4) to get a better sense of what Docker is doing. 
+There was definitely a steep learning curve. I still don't quite understand all the underlying mechanisms that are operating under the hood, but I'll try to lay out its implementation as simply as possible here. Assuming you know how to navigate Linux, read through the [Docker website](https://docs.docker.com/get-started/overview/) or watch this [youtube video](https://www.youtube.com/watch?v=aLipr7tTuA4) to get a better sense of what Docker is doing. 
 
 To start, we need to install the docker engine, which can be done by following the instructions [here](https://docs.docker.com/engine/install/ubuntu/). I also installed Docker Desktop, mostly on accident, but have found it to be really handy for keeping containers organized and inspecting the container instances.
 
@@ -96,13 +96,16 @@ To set it up, make an account on Cloudflare and purchase a domain name. Afterwar
 I recommend setting it up for at least overseer so you can use its request function while on the go by just opening up a browser. On phones you can also save a website as an app.
 
 #### Webhooks
-One final thing I set up is a way for me to be notified when there is an event on one of the services. There are some Docker containers that work to do so, but I've found it to be the easiest to work with webhooks on a Discord server. You simply make a new Discord channel, create a webhook, and copy paste into the services you would like reporting.  
+One final thing I set up is a way for me to be notified when there is an event on one of the services. There are some Docker containers that work to do so, but I've found it to be the easiest to work with webhooks on a Discord server. You simply make a new Discord channel, create a webhook, and copy paste into the services you would like reporting. If you have other home automation setups, you can use webhooks to connect them together so certain functions (like lights dimming) happen when you start a movie, etc. 
 
 ## Troubleshooting
-This seems all easy but I ran into a lot of roadblocks that I had to work around to get everything to actually work. Of those, here are the main difficulties I faced. 
+This seems pretty straightforward but I ran into a lot of roadblocks that I had to work around to get everything to actually work. Of those, here are the main difficulties I faced. 
+
 ### Permissions
 
+
 ### Network
+
 
 ### Hardware transcoding
 
