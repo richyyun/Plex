@@ -78,7 +78,7 @@ In order of the services that are on my Docker compose yaml file and specific se
 9. [heimdall](https://hub.docker.com/r/linuxserver/heimdall) - application dashboard
 10. [tautulli](https://hub.docker.com/r/linuxserver/tautulli) - Plex server stats monitoring
 
-Note I have every service other than Plex itself on the VPN as I figured it wouldn't hurt. You can also put Plex on the VPN but accessing outside your local network might get more complicated. 
+Note I have every service other than Plex and tautulli on the VPN as I figured it wouldn't hurt (tautulli doesn't seem to work behind a VPN). You can also put Plex on the VPN but accessing outside your local network might get more complicated. 
 To put a service on the VPN simply add `network_mode: service:expressvpn`. You should also add a `depends_on:` clause so it starts up after the VPN. If not using a VPN (or if the VPN is standalone and not dockerized) you need to setup an internal network such that each service can access one another as they will be isolated otherwise.  
 
 ### Setup
@@ -88,10 +88,15 @@ You can login and/or apply settings to each service by accessing its webUI throu
 2. bazarr, prowlarr, and overseer need to access radarr and sonarr
 3. tautulli needs to access plex
    
-#### Cloudflare tunneling
+#### Cloudflare tunnel
+Once the above is setup everything should be functioning. However, one major limitation is that you will not be able to access any of the services when outside the local network. One solution is to forward the port, but this can get dangerous especially if you're allowing access to overseer / radarr / sonarr as they have capabilities of downloading files. What I've found to be the best solution both in terms of ease of setup and cheap price is using a [Cloudflare tunnel]([https://www.cloudflare.com/products/tunnel/](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/). This effectively uses Cloudflare as an intermediate network to access the local port.
 
+To set it up, make an account on Cloudflare and purchase a domain name. Afterwards, simply follow [this page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-remote-tunnel/) to set up a tunnel to one of the services hosted at localhost:port. You can host multiple services using subdomains, e.g. `overseer.richyplex.com` and `tautulli.richyplex.com` to have access to the services you'd like. The tunnel will also give you a single line command to run in Docker for authentification. Note that all the services make you login when first accessing them through a different device. 
+
+I recommend setting it up for at least overseer so you can use its request function while on the go by just opening up a browser. On phones you can also save a website as an app.
 
 #### Webhooks
+One final thing I set up is a way for me to be notified when there is an event on one of the services. There are some 
 
 ## Troubleshooting
 ### Permissions
