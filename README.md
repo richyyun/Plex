@@ -6,6 +6,7 @@
 - Hardware transcoding
 - Cloudflare tunnel
 - Double check Radarr / Sonarr functionality
+- Usenet
 - Git README
 
 ## Build
