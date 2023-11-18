@@ -3,3 +3,7 @@
 
 ## TODO
 - Hardware transcoding
+
+## Build
+### Hardware
+### Docker
