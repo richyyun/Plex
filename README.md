@@ -56,6 +56,17 @@ Most of the layout is straightforward except for 3 parts that are common to ever
 All other settings can be found by looking up the image documentation. 
 
 ### Services
+In order of the services that are on my Docker compose yaml file and specific settings:
+1. [expressvpn](https://hub.docker.com/r/polkaned/expressvpn) - VPN
+   - Requires an activation code
+   - Needs to be a `NET_ADMIN`
+   - `/dev/net/tun` device allows for the VPN networking
+   - List all ports for services using the VPN network  
+2. [plex](https://hub.docker.com/r/linuxserver/plex) - Plex media server
+   - Use `network_mode:host` if possible. Otherwise, need to map all the ports listed
+   - Requires mapping of `/movies` and `/tv`
+   - `/dev/dri` device enables hardware transcoding
+3. 
 
 ## Troubleshooting
 ### Permissions
