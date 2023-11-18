@@ -1,0 +1,8 @@
+Subdomain for services via cloudflare (overseerr.richyplex.com, etc.)
+Double check VPN 
+Usenet downloader / Usenet indexers
+Update compose version? https://docs.docker.com/compose/compose-file/compose-file-v3/#network_mode
+All port numbers as strings (low port numbers may be unhappy, see above link)
+Make sure qbittorrent is using tunnel? 
+Split tunneling on expressvpn? 
+Setup git
