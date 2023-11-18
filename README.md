@@ -1,5 +1,5 @@
 # Plex
  Plex Media Server w/ Docker Compose
 
-## TODO:
+## TODO
 - Hardware transcoding
