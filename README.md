@@ -6,6 +6,7 @@
 - Hardware transcoding
 - Cloudflare tunnel
 - Double check Radarr / Sonarr functionality
+- tdarr (format changer) and deletarr (remover)
 - Usenet
 - Git README
 
