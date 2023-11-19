@@ -104,12 +104,23 @@ One final thing I set up is a way for me to be notified when there is an event o
 This seems pretty straightforward but I ran into a lot of roadblocks that I had to work around to get everything to actually work. Of those, here are the main difficulties I faced. 
 
 ### Permissions
-
+Permissions in Linux based systems is a giant rabbithole. I was not familiar enough with them before starting the setup which definitely made certain components more difficult or confusing. To keep things simple:
+- `root` is the "administrator" in Linux systems and has access to everything. It is defined as a different user than the actual user account, but users can access `root` level access by starting commands with `sudo`.
+- Groups are lists of users that's often used to define permissions to a number of users without having to list them one by one.
+- Docker, as mentioned before, runs software in an isolated environment but has access to volumes that have been mapped to the container. By passing the PUID and GUID of the user (found with command `id`) the container then acts as if it has the same permissions as the user running the docker containers. It is very common to run into permissions issues at first, especially when mounting drives, and keeping track of who owns what is critical to making sure everything works smoothly. 
 
 ### Network
-
+Docker defines networks containers that are also isolated from the system (usually IP of 17.x.x.x) which is the default `bridge` mode. To allow different services to communicate with one another you can also [define networks](https://docs.docker.com/network/network-tutorial-standalone/) within the yaml file and loop in each container to that network. Another option is to run the container in `host` mode in which case the container will use the network of the host device without defining its own network.
+For running Plex it's typically recommended (and easier) to run it in `host` mode as the server will automatically know how to pass the proper port. However, for some reason `host` networking was not working for me so I had to go through `bridge` mode.
+To forward a port in `bridge` mode you need to define two settings:
+1. Environment variable `ADVERTISE_IP` which uses that IP and port to communicate with the router. (NOTE: `ADVERTISE_IP` only functions properly on the official Plex image. However, there is a setting in Plex to set this value in Settings > Network > Custom server access URLs)
+2. Port forwarding on the router set to expose port 32400 to the IP and port defined above.  
+Finally, it's a good idea to set Settings > Network > LAN Networks to contain all local IPs. As the Plex IP will be defined as the container IP, it often does not see devices on the local network as local leading to direct play not working properly. This setting can take care of that issue (e.g `192.168.0.0/24` to define all IPs 192.168.0.x to be local).
 
 ### Hardware transcoding
+When using direct play in a local network there isn't a ton of overhead, but accessing Plex remotely or using various devices can lead to the need for transcoding (effectively changing the video format on the fly). Most CPUs can handle a bit using software, but is highly limited. GPUs can use hardware acceleration to transcode streams much more efficiently, so much so that a simple integrated graphics card can handle dozens of streams. 
+The first thing to do is to make sure that the iGPU is properly detected in Linux and using the correct drivers (`i915`). There are various ways of checking, such as `hwinfo` or `lspci` as well as making sure there are files within `/dev/dri`. In addition, some iGPUs may need to be set to `ENABLED` within the BIOS and/or set as the main display adapter especially if there is another dedicated GPU. Finally, you may also need to use `modprobe i915` command to actively use the correct driver.
 
+As of 11/18/23 I cannot get hardware transcoding to work properly. I have the iGPU enabled in the BIOS, the drivers working properly as seen through various ways to check, I have a `/dev/dri` folder with files in them in the local machine, I've edited the permissions to `/dev/dri`, made sure to correctly pass the device in the docker container, tried passing it in different ways, tried different versions of the official Plex image as well as the Linuxserver image, mapping the `/transcode` path which should be deprecated, etc. and have not been able to get the device passed properly to the container (i.e. `/dev/dri' does not exist in the container and the device does not show up in Plex Settings > Transcoding). At this point I'm thinking I may need to wait for better support for Alderlake architecture, but will revisit in the future. One drastic(?) idea I have is to actually install Plex rather than running it in a Docker container, but I would prefer for everything to be in Docker. 
 
 
