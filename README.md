@@ -1,5 +1,5 @@
 # Plex
- Plex Media Server w/ Docker Compose
+ Plex Media Server with Dockerized suite
 
 ## TODO
 - Remote access
