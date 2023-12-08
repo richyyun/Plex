@@ -2,203 +2,195 @@ version: "3.9"
 
 services:
 
-  expressvpn:
-    image: polkaned/expressvpn
-    container_name: expressvpn
-    environment:
-      - ACTIVATION_CODE=EWPZFFCETGH3U5JXNS2E5YJ
+  gluetun:
+    image: qmcgaw/gluetun:latest
+    container_name: gluetun
     cap_add:
       - NET_ADMIN
-    devices:
-      - "/dev/net/tun:/dev/net/tun"
-    privileged: true
-    tty: true
     ports:
-      # QBT UI Port
+      # QBT Ports
       - "8080:8080"
-      # Sonarr port
-      - "8989:8989"
-      # Radarr port
-      - "7878:7878"
-      # Lidarr port
-      - "8686:8686"
-      # Prowlarr port
-      - "9696:9696"
-      # Bazarr port
-      - "6767:6767"
-      # Overseerr port
-      - "5055:5055"
-      # Heimdall ports
-      - "80:80"
-      - "443:443"
-      # Tautulli ports
-      - "8181:8181"
-    command: /bin/bash
-    restart: unless-stopped
- 
-  plex:
-    image: plexinc/pms-docker:1.32.5.7349-8f4248874 #lscr.io/linuxserver/plex:latest
-    container_name: plex
-    #network_mode: "host"
+      - "6881:6881"
+      - "6881:6881/udp"
     environment:
-      - PUID=1000
-      - PGID=1000
-      - VERSION=docker
-      - ADVERTISE_IP=http://192.168.0.222:32400/
-      #- PLEX_CLAIM=claim-Dds6DJgTsQFNgq-rdsyH
+      - VPN_SERVICE_PROVIDER=expressvpn
+      - OPENVPN_USER=$VPN_USER
+      - OPENVPN_PASSWORD=$VPN_PW
+      - SERVER_COUNTRIES=USA
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
     volumes:
-      - ./config/plex:/config
-      - ./mnt/movies:/movies
-      - ./mnt/tv:/tv
-    ports:
-      - "32400:32400"
-      - "1900:1900"
-      - "3005:3005"
-      - "5353:5353"
-      - "8324:8324"
-      - "32410:32410"
-      - "32412:32412"
-      - "32413:32413"
-      - "32414:32414"
-      - "32469:32469"
-    devices:
-      - /dev/dri:/dev/dri
-      #- "/dev/dri/card0:/dev/dri/card0"
-      #- "/dev/dri/renderD128:/dev/dri/renderD128"
-    privileged: true 
+      - ./config/qbittorrent:/config
+      - $MEDIA/downloads:/downloads
     restart: unless-stopped
+    network_mode: service:$VPN
+    depends_on:
+      - $VPN
+ 
+#  plex:
+#    image: plexinc/pms-docker:1.32.5.7349-8f4248874 #lscr.io/linuxserver/plex:latest
+#    container_name: plex
+#    #network_mode: "host"
+#    environment:
+#      - PUID=1000
+#      - PGID=1000
+#      - VERSION=docker
+#      - ADVERTISE_IP=http://$IP:32400/
+#      #- PLEX_CLAIM=$PLEX_CLAIM
+#    volumes:
+#      - ./config/plex:/config
+#      - ./mnt/movies:/movies
+#      - ./mnt/tv:/tv
+#    ports:
+#      - "32400:32400"
+#      - "1900:1900"
+#      - "3005:3005"
+#      - "5353:5353"
+#      - "8324:8324"
+#      - "32410:32410"
+#      - "32412:32412"
+#      - "32413:32413"
+#      - "32414:32414"
+#      - "32469:32469"
+#    devices:
+#      - /dev/dri:/dev/dri
+#    privileged: true 
+#    restart: unless-stopped
 
   radarr:
     image: linuxserver/radarr
     container_name: radarr
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=US/Pacific
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
     volumes:
       - ./config/radarr:/config
-      - ./mnt/downloads:/downloads
-      - ./mnt/movies:/movies
+      - $MEDIA/downloads:/downloads
+      - $MEDIA/movies:/movies
     restart: unless-stopped
-    network_mode: service:expressvpn
-    depends_on:
-      - expressvpn
-    #networks:
-      #- media-network
+    ports:
+      - "7878:7878"
+#    network_mode: service:$VPN
+#    depends_on:
+#      - $VPN
 
   sonarr:
     image: linuxserver/sonarr
     container_name: sonarr
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=US/Pacific
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    ports:
+      - "8989:8989"
     volumes:
       - ./config/sonarr:/config
-      - ./mnt/downloads:/downloads
-      - ./mnt/tv:/tv
+      - $MEDIA/downloads:/downloads
+      - $MEDIA/tv:/tv
     restart: unless-stopped
-    network_mode: service:expressvpn
-    depends_on:
-      - expressvpn
-    #networks:
-      #- media-network
+#    network_mode: service:$VPN
+#    depends_on:
+#      - $VPN
 
   prowlarr:
-    image: linuxserver/prowlarr
+    image: linuxserver/prowlarr:latest
     container_name: prowlarr
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=US/Pacific
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    ports:
+      - "9696:9696"
     volumes:
       - ./config/prowlarr:/config
     restart: unless-stopped
-    network_mode: service:expressvpn
-    depends_on:
-      - expressvpn
-    #networks:
-      #- media-network
+#    network_mode: service:$VPN
+#    depends_on:
+#      - $VPN
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    environment:
+      - LOG_LEVEL=info
+      - LOG_HTML=false
+      - CAPTCAH_SOLVER=none
+      - TZ=$TZ
+    ports:
+      - "8191:8191"
+    restart: unless-stopped
 
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=US/Pacific
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    ports:
+      - "6767:6767"
     volumes:
       - ./config/bazarr:/config
-      - ./mnt/movies:/movies
-      - ./mnt/tv:/tv
+      - $MEDIA/movies:/movies
+      - $MEDIA/tv:/tv
     restart: unless-stopped
-    network_mode: service:expressvpn
-    depends_on:
-      - expressvpn
-    #networks:
-      #- media-network
+#    network_mode: service:$VPN
+#    depends_on:
+#      - $VPN
 
-  qbittorrent:
-    image: linuxserver/qbittorrent
-    container_name: qbittorrent
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=US/Pacific
-    volumes:
-      - ./config/qbittorrent:/config
-      - ./mnt/downloads:/downloads
-    restart: unless-stopped
-    network_mode: service:expressvpn
-    depends_on:
-      - expressvpn
-    #networks:
-      #- media-network
-  
   overseerr:
-    image: sctx/overseerr:latest
+    image: lscr.io/linuxserver/overseerr:latest
     container_name: overseerr
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=AUS/Pacific
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
     volumes:
-      - ./config/overseerr:/app/config
+      - ./config/overseerr:/config
     restart: unless-stopped
-#    ports:
-#      - 5055:5055
-    network_mode: service:expressvpn
-    depends_on:
-      - expressvpn
+    ports:
+      - "5055:5055"
+#    network_mode: service:expressvpn
+#    depends_on:
+#      - expressvpn
   
   heimdall:
     image: linuxserver/heimdall
     container_name: heimdall
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=US/Pacific
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    ports:
+      - "80:80"
+      - "443:443"
     volumes:
       - ./config/heimdall:/config
     restart: unless-stopped
-    network_mode: service:expressvpn
-    depends_on:
-      - expressvpn
-    #networks:
-      #- media-network
+#    network_mode: service:$VPN
+#    depends_on:
+#      - $VPN
 
   tautulli:
     image: lscr.io/linuxserver/tautulli:latest
     container_name: tautulli
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=US/Pacific
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
     volumes:
       - ./config/tautulli:/config
-    #ports:
-      #- 8181:8181
     restart: unless-stopped
-    depends_on:
-      - expressvpn
+    ports:
+      - "8181:8181"
+#    network_mode: service:$VPN
+#    depends_on:
+#      - $VPN
 
