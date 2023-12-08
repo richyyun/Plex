@@ -10,6 +10,7 @@
 - deletarr (remover, may not be necessary?)
 - watchtower (automatic container updater)
 - Usenet
+- Automatic startup at boot
 - Git README
 
 ## Build
