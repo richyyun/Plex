@@ -2,10 +2,10 @@
  Plex Media Server with Dockerized suite
 
 ## TODO
-- Remote access
-- Hardware transcoding
-- Cloudflare tunnel
-- Double check Radarr / Sonarr functionality
+- ~~Remote access~~
+- ~~Hardware transcoding~~
+- ~~Cloudflare tunnel~~
+- ~~Double check Radarr / Sonarr functionality~~
 - tdarr (format changer) and deletarr (remover)
 - Usenet
 - Git README
@@ -28,9 +28,9 @@ After much research I decided to implement everything on Docker in a Linux OS. T
 
 There was definitely a steep learning curve. I still don't quite understand all the underlying mechanisms that are operating under the hood, but I'll try to lay out its implementation as simply as possible here. Assuming you know how to navigate Linux, read through the [Docker website](https://docs.docker.com/get-started/overview/) or watch this [youtube video](https://www.youtube.com/watch?v=aLipr7tTuA4) to get a better sense of what Docker is doing. 
 
-To start, we need to install the docker engine, which can be done by following the instructions [here](https://docs.docker.com/engine/install/ubuntu/). I also installed Docker Desktop, mostly on accident, but have found it to be really handy for keeping containers organized and inspecting the container instances.
+To start, we need to install the docker engine, which can be done by following the instructions [here](https://docs.docker.com/engine/install/ubuntu/). I also installed Docker Desktop, and have found it to be really handy for keeping containers organized and inspecting the container instances.
 
-I used docker compose as it makes laying out the services incredibly easy. I also preferred it over CLI as it was cleaner / easier to read. There is a ton of documentation on [general usage](https://docs.docker.com/compose/compose-file/compose-file-v3/) as well as [specific examples](https://docs.linuxserver.io/general/docker-compose/) for setting up services.
+I used docker compose as it makes laying out the services incredibly easy. I also preferred it over CLI as it was cleaner to read. There is a ton of documentation on [general usage](https://docs.docker.com/compose/compose-file/compose-file-v3/) as well as [specific examples](https://docs.linuxserver.io/general/docker-compose/) for setting up services.
 
 In short, all you need to do is create a yaml file in the directory you would like the Docker containers to live in. Defining a service looks like:
 ```
@@ -57,17 +57,19 @@ Most of the layout is straightforward except for 3 parts that are common to ever
 
 All other settings can be found by looking up the image documentation. 
 
+Note: I also use predefined variables, seen as $VAR in my yml file, which can be defined in an .env file as VAR=value.
+
 ### Services
-In order of the services that are on my Docker compose yaml file and specific settings:
-1. [expressvpn](https://hub.docker.com/r/polkaned/expressvpn) - VPN
-   - Requires an activation code
-   - Needs to be a `NET_ADMIN`
+1. [gluetun](https://github.com/qdm12/gluetun-wiki) - VPN container
+   - Can run various different VPN services (I use ExpressVPN)
    - `/dev/net/tun` device allows for the VPN networking
-   - List all ports for services using the VPN network  
+   - List all ports for services using the VPN network
+   - User and passwords are typically grabbed by selecting "manual setup" on your VPN account, NOT your VPN login info.
 2. [plex](https://hub.docker.com/r/linuxserver/plex) - Plex media server
    - Use `network_mode:host` if possible. Otherwise, need to map all the ports listed
    - Requires mapping of `/movies` and `/tv`
    - `/dev/dri` device enables hardware transcoding
+   - Not using right now. For some reason hardware transcoding with my CPU does not work in Docker but works fine when just installing directly.
 3. [radarr](https://hub.docker.com/r/linuxserver/radarr) - movie collection manager
    - Requires mapping of `/downloads` which is where the movies are downloaded to and `/movies` which is where the movies will be stored
 4. [sonarr](https://hub.docker.com/r/linuxserver/sonarr) - tv show collection manager
@@ -80,8 +82,8 @@ In order of the services that are on my Docker compose yaml file and specific se
 9. [heimdall](https://hub.docker.com/r/linuxserver/heimdall) - application dashboard
 10. [tautulli](https://hub.docker.com/r/linuxserver/tautulli) - Plex server stats monitoring
 
-Note I have every service other than Plex and tautulli on the VPN as I figured it wouldn't hurt (tautulli doesn't seem to work behind a VPN). You can also put Plex on the VPN but accessing outside your local network might get more complicated. 
-To put a service on the VPN simply add `network_mode: service:expressvpn`. You should also add a `depends_on:` clause so it starts up after the VPN. If not using a VPN (or if the VPN is standalone and not dockerized) you need to setup an internal network such that each service can access one another as they will be isolated otherwise.  
+Note I used to have other services behind the VPN that I removed while I was debugging using an expressvpn image and never got around to using it again. It's likely good practice to put most services behind the VPN as it does not hurt. You do have to keep in mind to use the IP address instead of localhost to point things to that service though.
+To put a service on the VPN simply add `network_mode: service:gluetun`. You can also add a `depends_on:` clause so it starts up after the VPN. If not using a VPN (or if the VPN is standalone and not dockerized) you need to setup an internal network such that each service can access one another as they will be isolated otherwise.  
 
 ### Setup
 #### Settings
@@ -111,6 +113,8 @@ Permissions in Linux based systems is a giant rabbithole. I was not familiar eno
 
 ### Network
 Docker defines networks containers that are also isolated from the system (usually IP of 17.x.x.x) which is the default `bridge` mode. To allow different services to communicate with one another you can also [define networks](https://docs.docker.com/network/network-tutorial-standalone/) within the yaml file and loop in each container to that network. Another option is to run the container in `host` mode in which case the container will use the network of the host device without defining its own network.
+
+Not relevant anymore as I'm not running Plex in a container.
 For running Plex it's typically recommended (and easier) to run it in `host` mode as the server will automatically know how to pass the proper port. However, for some reason `host` networking was not working for me so I had to go through `bridge` mode.
 To forward a port in `bridge` mode you need to define two settings:
 1. Environment variable `ADVERTISE_IP` which uses that IP and port to communicate with the router. (NOTE: `ADVERTISE_IP` only functions properly on the official Plex image. However, there is a setting in Plex to set this value in Settings > Network > Custom server access URLs)
@@ -121,7 +125,7 @@ Finally, it's a good idea to set Settings > Network > LAN Networks to contain al
 When using direct play in a local network there isn't a ton of overhead, but accessing Plex remotely or using various devices can lead to the need for transcoding (effectively changing the video format on the fly). Most CPUs can handle a bit using software, but is highly limited. GPUs can use hardware acceleration to transcode streams much more efficiently, so much so that a simple integrated graphics card can handle dozens of streams. 
 The first thing to do is to make sure that the iGPU is properly detected in Linux and using the correct drivers (`i915`). There are various ways of checking, such as `hwinfo` or `lspci` as well as making sure there are files within `/dev/dri`. In addition, some iGPUs may need to be set to `ENABLED` within the BIOS and/or set as the main display adapter especially if there is another dedicated GPU. Finally, you may also need to use `modprobe i915` command to actively use the correct driver.
 
-As of 11/18/23 I cannot get hardware transcoding to work properly. I have the iGPU enabled in the BIOS, the drivers working properly as seen through various ways to check, I have a `/dev/dri` folder with files in them in the local machine, I have:
+11/18/23 I cannot get hardware transcoding to work properly. I have the iGPU enabled in the BIOS, the drivers working properly as seen through various ways to check, I have a `/dev/dri` folder with files in them in the local machine, I have:
 - Edited the permissions to `/dev/dri`
 - Made sure to correctly pass the device in the docker container
 - Tried passing it in different ways, tried different versions of the official Plex image as well as the Linuxserver image
@@ -129,4 +133,5 @@ As of 11/18/23 I cannot get hardware transcoding to work properly. I have the iG
 - etc. 
 and have not been able to get the device passed properly to the container (i.e. `/dev/dri' does not exist in the container and the device does not show up in Plex Settings > Transcoding). At this point I'm thinking I may need to wait for better support for Alderlake architecture, but will revisit in the future. One drastic(?) idea I have is to actually install Plex rather than running it in a Docker container, but I would prefer for everything to be in Docker. 
 
+12/6/23 Turns out the Docker image of Plex, both the official image and the linuxserver image, can't seem to get the hardware transcoding to work but installing it directly on the computer works fine. I'm still guessing it's some permissions error, but it could also be because the CPU I'm using is fairly new and the Docker images may not support it. 
 
