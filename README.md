@@ -6,7 +6,9 @@
 - ~~Hardware transcoding~~
 - ~~Cloudflare tunnel~~
 - ~~Double check Radarr / Sonarr functionality~~
-- tdarr (format changer) and deletarr (remover)
+- tdarr (format changer)
+- deletarr (remover, may not be necessary?)
+- watchtower (automatic container updater)
 - Usenet
 - Git README
 
