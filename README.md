@@ -6,10 +6,11 @@
 - ~~Hardware transcoding~~
 - ~~Cloudflare tunnel~~
 - ~~Double check Radarr / Sonarr functionality~~
-- tdarr (format changer)
-- watchtower (automatic container updater)
-- Usenet
 - ~~Automatic startup at boot~~
+- tdarr (format changer, to h264 or h265?)
+- watchtower (automatic container updater)
+- start Ubuntu headless (GUI-less at least. `systemctl disable lightdm.service`)
+- Usenet
 - Git README
 
 ## Build
