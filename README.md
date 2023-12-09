@@ -7,10 +7,9 @@
 - ~~Cloudflare tunnel~~
 - ~~Double check Radarr / Sonarr functionality~~
 - tdarr (format changer)
-- deletarr (remover, may not be necessary?)
 - watchtower (automatic container updater)
 - Usenet
-- Automatic startup at boot
+- ~~Automatic startup at boot~~
 - Git README
 
 ## Build
