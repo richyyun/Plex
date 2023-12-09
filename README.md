@@ -6,8 +6,10 @@
 - ~~Hardware transcoding~~
 - ~~Cloudflare tunnel~~
 - ~~Double check Radarr / Sonarr functionality~~
-- tdarr (format changer) and deletarr (remover)
+- tdarr (format changer)
+- watchtower (automatic container updater)
 - Usenet
+- ~~Automatic startup at boot~~
 - Git README
 
 ## Build
@@ -99,8 +101,18 @@ To set it up, make an account on Cloudflare and purchase a domain name. Afterwar
 
 I recommend setting it up for at least overseer so you can use its request function while on the go by just opening up a browser. On phones you can also save a website as an app.
 
+Note I could not get it to work on compose so had to do it w/ CLI. I recommend editing the run to give it a `--name` as well as the `-d` flag to make sure it runs detached.
+
 #### Webhooks
-One final thing I set up is a way for me to be notified when there is an event on one of the services. There are some Docker containers that work to do so, but I've found it to be the easiest to work with webhooks on a Discord server. You simply make a new Discord channel, create a webhook, and copy paste into the services you would like reporting. If you have other home automation setups, you can use webhooks to connect them together so certain functions (like lights dimming) happen when you start a movie, etc. 
+Another tool I set up is a way for me to be notified when there is an event on one of the services. There are some Docker containers that work to do so, but I've found it to be the easiest to work with webhooks on a Discord server. You simply make a new Discord channel, create a webhook, and copy paste into the services you would like reporting. If you have other home automation setups, you can use webhooks to connect them together so certain functions (like lights dimming) happen when you start a movie, etc. 
+
+#### Robusifying
+One main issue I ran into after setting it all up was power outages. When the power was restored I had to boot up the machine, start the docker engine, and start the containers. While not a ton of work, I realized this would be an issue if I were to be away and the power go down. To make sure the whole system is able to start itself after the power comes back on you need to:
+1. Change your BIOS settings to make the PC boot when power comes on. For the Beelink PC I have it's under Chipset>bottom row>State after G3>set to S0
+2. Set restart flags of all containers to be "always". This ensures the container starts up when the docker engine starts. For the cloudflared CLI, you need to add a `--restart always` flag.
+3. run `sudo systemctl enable docker` to force the docker service to start. You may need to run `sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin` to ensure that docker works as a service.
+
+One thing I realized is that docker desktop and the docker service engine seem to be operating independently, and for this to work the docker containers must be running on the CLI engine (i.e. the service). To ensure this is happening, close docker desktop and reboot your computer. Then run `docker compose up -d` and the cloudflare docker command. It may pull the images again as well. 
 
 ## Troubleshooting
 This seems pretty straightforward but I ran into a lot of roadblocks that I had to work around to get everything to actually work. Of those, here are the main difficulties I faced. 
