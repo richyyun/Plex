@@ -100,7 +100,7 @@ Once the above is setup everything should be functioning. However, one major lim
 
 To set it up, make an account on Cloudflare and purchase a domain name. Afterwards, simply follow [this page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-remote-tunnel/) to set up a tunnel to one of the services hosted at localhost:port. You can host multiple services using subdomains, e.g. `overseer.richyplex.com` and `tautulli.richyplex.com` to have access to the services you'd like. The tunnel will also give you a single line command to run in Docker for authentification. Note that all the services make you login when first accessing them through a different device. 
 
-I recommend setting it up for at least overseer so you can use its request function while on the go by just opening up a browser. On phones you can also save a website as an app.
+I recommend setting it up for at least overseer so you can use its request function while on the go by just opening up a browser. On phones you can also save a website as an app. I've put most services on a tunnel so I can reach them remotely if I need.
 
 Note I could not get it to work on compose so had to do it w/ CLI. I recommend editing the run to give it a `--name` as well as the `-d` flag to make sure it runs detached.
 
