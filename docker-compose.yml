@@ -184,3 +184,12 @@ services:
       - TUNNEL_TOKEN=$TOKEN
     restart: $RESTART
 
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    environment:
+      - TZ=$TZ
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /root/.docker/config.json:/config.json
+    command: --cleanup True
