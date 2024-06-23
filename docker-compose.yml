@@ -17,6 +17,7 @@ services:
       - "8080:8080"
       - "6881:6881"
       - "6881:6881/udp"
+#      - "9696:9696"
     restart: $RESTART
 
   qbittorrent:
@@ -106,6 +107,7 @@ services:
     ports:
       - "9696:9696"
     restart: $RESTART
+#    network_mode: service:$VPN
 
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
@@ -174,7 +176,11 @@ services:
       - "8181:8181"
     restart: $RESTART
 
-    
- 
-    
-    
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: tunnel
+    command: tunnel run
+    environment:
+      - TUNNEL_TOKEN=$TOKEN
+    restart: $RESTART
+
