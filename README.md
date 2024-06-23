@@ -6,10 +6,11 @@
 - ~~Hardware transcoding~~
 - ~~Cloudflare tunnel~~
 - ~~Double check Radarr / Sonarr functionality~~
-- tdarr (format changer)
-- watchtower (automatic container updater)
-- Usenet
 - ~~Automatic startup at boot~~
+- tdarr (format changer, to h264 or h265?)
+- watchtower (automatic container updater)
+- start Ubuntu headless (GUI-less at least. `systemctl disable lightdm.service`)
+- Usenet
 - Git README
 
 ## Build
@@ -87,26 +88,26 @@ Note: I also use predefined variables, seen as $VAR in my yml file, which can be
 Note I used to have other services behind the VPN that I removed while I was debugging using an expressvpn image and never got around to using it again. It's likely good practice to put most services behind the VPN as it does not hurt. You do have to keep in mind to use the IP address instead of localhost to point things to that service though.
 To put a service on the VPN simply add `network_mode: service:gluetun`. You can also add a `depends_on:` clause so it starts up after the VPN. If not using a VPN (or if the VPN is standalone and not dockerized) you need to setup an internal network such that each service can access one another as they will be isolated otherwise.  
 
-### Setup
-#### Settings
+## Setup
+### Settings
 You can login and/or apply settings to each service by accessing its webUI through localhost:port on a browser. Note that for Plex it's localhost:32400/web/. Besides basic settings, the following connections have to be made between services using authentication tokens:
 1. radarr and sonarr need to access qbittorrent
 2. bazarr, prowlarr, and overseer need to access radarr and sonarr
 3. tautulli needs to access plex
    
-#### Cloudflare tunnel
+### Cloudflare tunnel
 Once the above is setup everything should be functioning. However, one major limitation is that you will not be able to access any of the services when outside the local network. One solution is to forward the port, but this can get dangerous especially if you're allowing access to overseer / radarr / sonarr as they have capabilities of downloading files. What I've found to be the best solution both in terms of ease of setup and cheap price is using a [Cloudflare tunnel]([https://www.cloudflare.com/products/tunnel/](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/). This effectively uses Cloudflare as an intermediate network to access the local port.
 
 To set it up, make an account on Cloudflare and purchase a domain name. Afterwards, simply follow [this page](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-remote-tunnel/) to set up a tunnel to one of the services hosted at localhost:port. You can host multiple services using subdomains, e.g. `overseer.richyplex.com` and `tautulli.richyplex.com` to have access to the services you'd like. The tunnel will also give you a single line command to run in Docker for authentification. Note that all the services make you login when first accessing them through a different device. 
 
-I recommend setting it up for at least overseer so you can use its request function while on the go by just opening up a browser. On phones you can also save a website as an app.
+I recommend setting it up for at least overseer so you can use its request function while on the go by just opening up a browser. On phones you can also save a website as an app. I've put most services on a tunnel so I can reach them remotely if I need.
 
 Note I could not get it to work on compose so had to do it w/ CLI. I recommend editing the run to give it a `--name` as well as the `-d` flag to make sure it runs detached.
 
-#### Webhooks
+### Webhooks
 Another tool I set up is a way for me to be notified when there is an event on one of the services. There are some Docker containers that work to do so, but I've found it to be the easiest to work with webhooks on a Discord server. You simply make a new Discord channel, create a webhook, and copy paste into the services you would like reporting. If you have other home automation setups, you can use webhooks to connect them together so certain functions (like lights dimming) happen when you start a movie, etc. 
 
-#### Robusifying
+### Robusifying
 One main issue I ran into after setting it all up was power outages. When the power was restored I had to boot up the machine, start the docker engine, and start the containers. While not a ton of work, I realized this would be an issue if I were to be away and the power go down. To make sure the whole system is able to start itself after the power comes back on you need to:
 1. Change your BIOS settings to make the PC boot when power comes on. For the Beelink PC I have it's under Chipset>bottom row>State after G3>set to S0
 2. Set restart flags of all containers to be "always". This ensures the container starts up when the docker engine starts. For the cloudflared CLI, you need to add a `--restart always` flag.
